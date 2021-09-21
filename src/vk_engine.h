@@ -4,8 +4,11 @@
 #pragma once
 
 #include <vk_types.h>
+#include <vk_mesh.h>
 
 #include <vector>
+
+#include "vk_mem_alloc.h"
 
 class VulkanEngine
 {
@@ -50,6 +53,22 @@ public:
   VkSemaphore _renderSemaphore = VK_NULL_HANDLE;
   VkFence _renderFence = VK_NULL_HANDLE;
 
+  // pipeline
+  VkPipelineLayout _trianglePipelineLayout = VK_NULL_HANDLE;
+  VkPipeline _trianglePipeline = VK_NULL_HANDLE;
+  VkPipeline _redTrianglePipeline = VK_NULL_HANDLE;
+  VkPipeline _meshPipeline = VK_NULL_HANDLE;
+
+  // Shader switching
+  int _selectedShader = 0;
+
+  // Allocator
+  VmaAllocator _allocator;
+
+  // Meshes
+  Mesh _triangleMesh;
+
+
 private:
 
   void init_vulkan();
@@ -58,4 +77,10 @@ private:
   void init_default_renderpass();
   void init_framebuffers();
   void init_sync_structures();
+  void init_pipelines();
+
+  // returns false on failure
+  bool load_shader_module( const char* spirvpath, VkShaderModule* out );
+  void load_meshes();
+  void upload_mesh( Mesh& mesh );
 };
