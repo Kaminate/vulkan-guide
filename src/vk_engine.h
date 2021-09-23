@@ -7,8 +7,15 @@
 #include <vk_mesh.h>
 
 #include <vector>
+#include <glm/glm.hpp>
 
 #include "vk_mem_alloc.h"
+
+struct MeshPushConstants
+{
+  glm::vec4 data;
+  glm::mat4 render_matrix;
+};
 
 class VulkanEngine
 {
@@ -55,6 +62,7 @@ public:
 
   // pipeline
   VkPipelineLayout _trianglePipelineLayout = VK_NULL_HANDLE;
+  VkPipelineLayout _meshPipelineLayout = VK_NULL_HANDLE;
   VkPipeline _trianglePipeline = VK_NULL_HANDLE;
   VkPipeline _redTrianglePipeline = VK_NULL_HANDLE;
   VkPipeline _meshPipeline = VK_NULL_HANDLE;

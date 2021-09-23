@@ -9,6 +9,7 @@
 #include <iostream>
 #include <array>
 #include <fstream>
+#include <glm/gtx/transform.hpp>
 
 #include "VkBootstrap.h"
 
@@ -148,6 +149,22 @@ void VulkanEngine::draw()
 
   VkDeviceSize offset = 0;
   vkCmdBindVertexBuffers( cmd, 0, 1, &_triangleMesh._vertexBuffer._buffer, &offset );
+
+  const float aspect = ( float )_windowExtent.width / ( float )_windowExtent.height;
+  glm::vec3 camPos = { 0,0,-2 };
+  glm::mat4 view = glm::translate(glm::mat4(1), camPos);
+  glm::mat4 proj = glm::perspective( glm::radians( 70.0f ), aspect, 0.1f, 200.0f );
+  proj[ 1 ][ 1 ] *= -1;
+  glm::mat4 model = glm::rotate( glm::mat4( 1 ), glm::radians( _frameNumber * 4.0f ), glm::vec3( 0, 1, 0 ) );
+  glm::mat4 mesh_matrix = proj * view * model;
+  MeshPushConstants constants;
+  constants.render_matrix = mesh_matrix;
+  vkCmdPushConstants( cmd,
+                      _meshPipelineLayout,
+                      VK_SHADER_STAGE_VERTEX_BIT,
+                      0,
+                      sizeof( MeshPushConstants ),
+                      &constants );
 
   vkCmdDraw( cmd, ( uint32_t )_triangleMesh._verticies.size(), 1, 0, 0 );
 
@@ -415,6 +432,18 @@ void VulkanEngine::init_pipelines()
   VkPipelineLayoutCreateInfo pipeline_layout = vkinit::pipeline_layout_create_info();
   VK_CHECK( vkCreatePipelineLayout( _device, &pipeline_layout, nullptr, &_trianglePipelineLayout ) );
 
+  std::array pushConstants = { []()
+  {
+    VkPushConstantRange push_constant = {};
+    push_constant.size = sizeof( MeshPushConstants );
+    push_constant.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    return push_constant;
+  }( ) };
+  VkPipelineLayoutCreateInfo mesh_pipeline_layout_info = vkinit::pipeline_layout_create_info();
+  mesh_pipeline_layout_info.pPushConstantRanges = pushConstants.data();
+  mesh_pipeline_layout_info.pushConstantRangeCount = ( uint32_t )pushConstants.size();
+  VK_CHECK( vkCreatePipelineLayout( _device, &mesh_pipeline_layout_info, nullptr, &_meshPipelineLayout ) );
+
   VertexInputDescription vertexDesc = Vertex::get_vertex_description();
 
   PipelineBuilder pipelineBuilder = {};
@@ -435,7 +464,7 @@ void VulkanEngine::init_pipelines()
 
   // single blend attachment, no blend, write rgba
   pipelineBuilder._colorBlendAttachment = vkinit::color_blend_attachment_state();
-  pipelineBuilder._pipelineLayout = _trianglePipelineLayout;
+  pipelineBuilder._pipelineLayout = _meshPipelineLayout;
   _redTrianglePipeline = pipelineBuilder.build_pipeline( _device, _renderPass );
 
   shaderStageCreator.clear();
