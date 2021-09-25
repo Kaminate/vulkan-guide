@@ -23,5 +23,11 @@ namespace vkinit
   VkPipelineMultisampleStateCreateInfo multisample_state_create_info();
   VkPipelineColorBlendAttachmentState color_blend_attachment_state();
   VkPipelineLayoutCreateInfo pipeline_layout_create_info();
+  VkPipelineDepthStencilStateCreateInfo depth_stencil_create_info( bool depthTest, bool depthWrite, VkCompareOp );
+
+  VkImageCreateInfo image_create_info( VkFormat, VkImageUsageFlags, VkExtent3D );
+  VkImageViewCreateInfo image_view_create_info( VkFormat, VkImage, VkImageAspectFlags );
+
+  VkRenderPassBeginInfo renderpass_begin_info( VkRenderPass, VkExtent2D, VkFramebuffer );
 }
 

@@ -32,6 +32,7 @@ VkPipeline PipelineBuilder::build_pipeline( VkDevice device, VkRenderPass pass )
   pipelineInfo.pColorBlendState = &colorBlending;
   pipelineInfo.layout = _pipelineLayout;
   pipelineInfo.renderPass = pass;
+  pipelineInfo.pDepthStencilState = &_depthStencil;
 
   std::array pipelineInfos = { pipelineInfo };
   VkPipeline pipeline;

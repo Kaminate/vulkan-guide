@@ -5,16 +5,29 @@
 
 #include <vk_types.h>
 #include <vk_mesh.h>
-
-#include <vector>
+#include "vk_mem_alloc.h"
 #include <glm/glm.hpp>
 
-#include "vk_mem_alloc.h"
+#include <vector>
+#include <unordered_map>
 
 struct MeshPushConstants
 {
   glm::vec4 data;
   glm::mat4 render_matrix;
+};
+
+struct Material
+{
+  VkPipeline pipeline;
+  VkPipelineLayout pipelineLayout;
+};
+
+struct RenderObject
+{
+  Mesh* mesh;
+  Material* material;
+  glm::mat4 transformMatrix;
 };
 
 class VulkanEngine
@@ -75,6 +88,27 @@ public:
 
   // Meshes
   Mesh _triangleMesh;
+  Mesh _monkeyMesh;
+
+  // Depth Image
+  VkImageView _depthImageView;
+  AllocatedImage _depthImage;
+  VkFormat _depthFormat;
+
+  // Renderable objects
+  std::vector< RenderObject > _renderables;
+  std::unordered_map< std::string, Material > _materials;
+  std::unordered_map< std::string, Mesh > _meshes;
+
+  Material* create_material( VkPipeline, VkPipelineLayout, const std::string& name );
+
+  // returns nullptr if not found
+  Material* get_material( const std::string& name );
+
+  // returns nullptr if not found
+  Mesh* get_mesh( const std::string& name );
+
+  void draw_objects( VkCommandBuffer, RenderObject*, int );
 
 
 private:
@@ -86,6 +120,7 @@ private:
   void init_framebuffers();
   void init_sync_structures();
   void init_pipelines();
+  void init_scene();
 
   // returns false on failure
   bool load_shader_module( const char* spirvpath, VkShaderModule* out );

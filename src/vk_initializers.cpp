@@ -23,7 +23,7 @@ VkCommandBufferAllocateInfo vkinit::command_buffer_allocate_info( VkCommandPool 
 }
 
 VkPipelineShaderStageCreateInfo vkinit::shader_stage_create_info( VkShaderStageFlagBits stage,
-                                                          VkShaderModule shaderModule )
+                                                                  VkShaderModule shaderModule )
 {
   VkPipelineShaderStageCreateInfo info = {};
   info.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -86,4 +86,57 @@ VkPipelineLayoutCreateInfo vkinit::pipeline_layout_create_info()
   return info;
 }
 
+VkPipelineDepthStencilStateCreateInfo vkinit::depth_stencil_create_info( bool depthTest,
+                                                                 bool depthWrite,
+                                                                 VkCompareOp compareOp )
+{
+  VkPipelineDepthStencilStateCreateInfo info = {};
+  info.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+  info.depthTestEnable = depthTest ? VK_TRUE : VK_FALSE;
+  info.depthWriteEnable = depthWrite ? VK_TRUE : VK_FALSE;
+  info.depthCompareOp = depthTest ? compareOp : VK_COMPARE_OP_ALWAYS;
+  info.minDepthBounds = 0;
+  info.maxDepthBounds = 1;
+  info.stencilTestEnable = VK_FALSE;
+  return info;
+}
 
+VkImageCreateInfo vkinit::image_create_info( VkFormat format, VkImageUsageFlags usageFlags, VkExtent3D extent )
+{
+  VkImageCreateInfo info = {};
+  info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+  info.extent = extent;
+  info.format = format;
+  info.imageType = VK_IMAGE_TYPE_2D;
+  info.mipLevels = 1;
+  info.arrayLayers = 1;
+  info.samples = VK_SAMPLE_COUNT_1_BIT;
+  info.tiling = VK_IMAGE_TILING_OPTIMAL;
+  info.usage = usageFlags;
+  return info;
+}
+
+VkImageViewCreateInfo vkinit::image_view_create_info( VkFormat format, VkImage image, VkImageAspectFlags aspectFlags )
+{
+  VkImageViewCreateInfo info = {};
+  info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+  info.viewType = VK_IMAGE_VIEW_TYPE_2D;
+  info.image = image;
+  info.format = format;
+  info.subresourceRange.levelCount = 1;
+  info.subresourceRange.layerCount = 1;
+  info.subresourceRange.aspectMask = aspectFlags;
+  return info;
+}
+
+VkRenderPassBeginInfo vkinit::renderpass_begin_info( VkRenderPass renderPass,
+                                                     VkExtent2D extent,
+                                                     VkFramebuffer framebuffer )
+{
+  VkRenderPassBeginInfo rpInfo = {};
+  rpInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+  rpInfo.renderPass = renderPass;
+  rpInfo.renderArea.extent = extent;
+  rpInfo.framebuffer = framebuffer;
+  return rpInfo;
+}
